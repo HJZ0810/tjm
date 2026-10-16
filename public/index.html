@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>个人工作台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #0f1b2d 0%, #1d3a5f 100%);
+      color: #e8eef7;
+    }
+    .card {
+      text-align: center;
+      padding: 48px 56px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+    }
+    h1 { font-size: 28px; font-weight: 600; margin-bottom: 12px; }
+    p { font-size: 15px; opacity: 0.75; line-height: 1.8; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+           background: #4ade80; margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>个人工作台</h1>
+    <p><span class="dot"></span>公开服务框架运行中</p>
+    <p style="margin-top:8px;font-size:13px;opacity:.55">业务模块为私有实现，未随本仓库开源</p>
+  </div>
+</body>
+</html>

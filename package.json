@@ -1,0 +1,13 @@
+{
+  "name": "chaoxing-workbench",
+  "version": "0.6.0",
+  "private": true,
+  "description": "个人工作台 —— 公开服务骨架与部署框架（完整版业务实现为私有自用）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

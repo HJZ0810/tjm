@@ -1,0 +1,36 @@
+# 依赖与运行时
+node_modules/
+data/
+data-test/
+
+# 环境变量与密钥
+.env
+.env.local
+config.json
+
+# 日志
+*.log
+logs/
+audit-log/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时与测试
+_work/
+*.tmp
+*.bak
+_test*/
+*_test*/
+uitest*/
+test_*/
+shots_*/
+未解决清单*

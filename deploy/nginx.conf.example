@@ -1,0 +1,63 @@
+# ============================================================
+#  反向代理示例（Nginx）
+#  放到 /etc/nginx/sites-available/chaoxing-workbench 并软链到 sites-enabled
+#
+#  本示例按私有完整版的路由需求编写（长连接、验证码直出、大 body 等）；
+#  公开服务骨架只有 /api/health 与静态资源，直接反代 / 即可。
+#
+#  为什么要反代：
+#   1. 直接暴露 3000 端口没有 HTTPS，学习通会话 Cookie 和 AI 对话都是明文
+#   2. 反代后面才好挂域名、挂 Basic Auth、限流
+#   3. 手机端要装到桌面（PWA 风格的体验）必须有 HTTPS
+# ============================================================
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name study.example.com;              # ← 换成你的域名
+    return 301 https://$host$request_uri;       # 全站跳 HTTPS
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name study.example.com;              # ← 换成你的域名
+
+    # 用 certbot 免费签发：certbot --nginx -d study.example.com
+    ssl_certificate     /etc/letsencrypt/live/study.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/study.example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+
+    # 单请求体上限（备份/恢复功能会 POST 整个 state）
+    client_max_body_size 20m;
+
+    # 深度解析要开真实浏览器，单次可能要 20~30 秒，超时给宽一点
+    proxy_connect_timeout 30s;
+    proxy_send_timeout    120s;
+    proxy_read_timeout    120s;
+
+    # 想加一层访问口令就打开下面两行（htpasswd -c /etc/nginx/.htpasswd 你的用户名）
+    # auth_basic "Restricted";
+    # auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+        proxy_buffering off;                 # AI 回复是长请求，别缓冲
+    }
+
+    # 学习通验证码图片是二进制直出，别让反代缓存
+    location /api/cx/captcha {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        add_header Cache-Control "no-store";
+    }
+}

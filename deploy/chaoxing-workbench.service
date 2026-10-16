@@ -1,0 +1,36 @@
+[Unit]
+# 面向私有完整版的 systemd 单元；公开骨架同样可用（ExecStart 不变），
+# 只是 EnvironmentFile 中业务相关变量不会被骨架消费。
+Description=个人工作台
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# 改成本机实际路径
+WorkingDirectory=/opt/chaoxing-workbench
+# 配在这里就不用改代码：见同目录 .env.example
+EnvironmentFile=/opt/chaoxing-workbench/.env
+ExecStart=/usr/bin/node server.js
+# 学习通登录要出网；会话 Cookie 落在 DATA_DIR
+Environment=NODE_ENV=production
+Environment=TZ=Asia/Shanghai
+
+Restart=always
+RestartSec=5
+# 浏览器内核在 /dev/shm 不够小时容易崩，给足
+PrivateTmp=false
+
+# 安全加固：只允许写数据目录
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/chaoxing-workbench/data
+PrivateDevices=false
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=chaoxing-workbench
+
+[Install]
+WantedBy=multi-user.target

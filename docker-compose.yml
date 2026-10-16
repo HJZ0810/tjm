@@ -1,0 +1,45 @@
+# ============================================================
+#  一键起在自己服务器上：docker compose up -d --build
+#  改配置只需要编辑同目录的 .env（从 .env.example 复制）
+#
+#  本编排按私有完整版需求编写（浏览器内核、定时同步等）。
+#  仅运行公开骨架时，把下方 WITH_BROWSER 置 "0"，并忽略 .env 中
+#  骨架不消费的变量即可。
+# ============================================================
+services:
+  workbench:
+    build:
+      context: .
+      args:
+        # 1 = 装 Chromium，解锁「深度解析」（能真开浏览器读学习通内页）
+        # 0 = 不装，镜像小很多，但只能读接口列表数据
+        WITH_BROWSER: "1"
+    image: chaoxing-workbench:latest
+    container_name: chaoxing-workbench
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: "3000"
+      HOST: "0.0.0.0"
+      DATA_DIR: "/data"
+      # 容器里浏览器内核路径由镜像决定，这里给个显式值更稳
+      PLAYWRIGHT_BROWSERS_PATH: "/ms-playwright"
+      # 自己的服务器上开着：后台定时同步，AI 随时有最新数据
+      CX_SYNC_INTERVAL_MIN: "${CX_SYNC_INTERVAL_MIN:-30}"
+    ports:
+      # 只绑本机，外面统一走 Nginx/Caddy 反代 + HTTPS（见 deploy/nginx.conf.example）
+      # 想直接裸跑就改成 "3000:3000"
+      - "127.0.0.1:3000:3000"
+    volumes:
+      # 业务数据 + 学习通会话，务必持久化
+      - workbench-data:/data
+    # 浏览器比较吃内存，给个下限，避免被 OOM 杀掉
+    shm_size: "1gb"
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+volumes:
+  workbench-data:
